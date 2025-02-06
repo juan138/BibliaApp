@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { AppModule } from './app.module';
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
@@ -15,5 +16,11 @@ export class AppComponent {
     { title: 'Spam', url: '/folder/spam', icon: 'warning' },
   ];
   public labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
-  constructor() {}
+
+  librosBiblia:any;
+  constructor(public app : AppModule) {
+
+    this.librosBiblia=app.librosBiblia;
+
+  }
 }

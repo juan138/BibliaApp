@@ -2,31 +2,56 @@
   <ion-split-pane contentId="main-content">
     <ion-menu contentId="main-content" type="overlay">
       <ion-content>
-        <ion-list id="inbox-list">
-          <ion-list-header>Inbox</ion-list-header>
-          <ion-note>hi&#64;ionicframework.com</ion-note>
 
-          @for (p of appPages; track p; let i = $index) {
-            <ion-menu-toggle auto-hide="false">
-              <ion-item routerDirection="root" [routerLink]="[p.url]" lines="none" detail="false" routerLinkActive="selected">
-                <ion-icon aria-hidden="true" slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
-                <ion-label>{{ p.title }}</ion-label>
-              </ion-item>
-            </ion-menu-toggle>
-          }
-        </ion-list>
+        <ion-row>
+          <ion-col class="md-12 ion-text-center" >
+            <img src="../assets/img/RV_1996_B.png" alt="">
+          </ion-col>
+        </ion-row>
+       
 
-        <ion-list id="labels-list">
-          <ion-list-header>Labels</ion-list-header>
-
-          @for (label of labels; track label) {
-            <ion-item lines="none">
-              <ion-icon aria-hidden="true" slot="start" ios="bookmark-outline" md="bookmark-sharp"></ion-icon>
-              <ion-label>{{ label }}</ion-label>
+        <ion-accordion-group [value]="['first']">
+          <ion-accordion value="first">
+            <ion-item slot="header" color="light">
+              <ion-label>ANTIGUO TESTAMENTO</ion-label>
             </ion-item>
-          }
-        </ion-list>
+            <div class="ion-padding" slot="content">
+              
+              @for (p of librosBiblia.antiguoTestamento; track p; let i = $index) {
+                <ion-menu-toggle auto-hide="false">
+                  <ion-item class="pointer" [routerLink]="'/read-book/1/1'" lines="none">
+                    <ion-icon aria-hidden="true" slot="start" ios="bookmark-outline" md="bookmark-sharp"></ion-icon>
+                    <ion-label>{{ p.nombre }}</ion-label>
+                  </ion-item>
+                  <!--<ion-item routerDirection="root" [routerLink]="[p.url]" lines="none" detail="false" routerLinkActive="selected">
+                    <ion-icon aria-hidden="true" slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
+                    <ion-label>{{ p.title }}</ion-label>
+                  </ion-item>-->
+                </ion-menu-toggle>
+              }
+
+            </div>
+          </ion-accordion>
+          <ion-accordion value="second">
+            <ion-item slot="header" color="light">
+              <ion-label>NUEVO TESTAMENTO</ion-label>
+            </ion-item>
+            <div class="ion-padding" slot="content">
+              @for (label of librosBiblia.nuevoTestamento; track label) {
+                <ion-item class="pointer" lines="none">
+                  <ion-icon aria-hidden="true" slot="start" ios="bookmark-outline" md="bookmark-sharp"></ion-icon>
+                  <ion-label>{{ label.nombre }}</ion-label>
+                </ion-item>
+              }
+            </div>
+          </ion-accordion>
+        </ion-accordion-group>
       </ion-content>
+      <ion-footer>
+        <ion-toolbar>
+          <ion-title>Configuraci&oacute;n   <img class="settings" src="../assets/img/setting.png" alt=""> </ion-title>
+        </ion-toolbar>
+      </ion-footer>
     </ion-menu>
     <ion-router-outlet id="main-content"></ion-router-outlet>
   </ion-split-pane>
