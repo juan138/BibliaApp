@@ -1,0 +1,7 @@
+{
+  "name": "BibliaApp",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
