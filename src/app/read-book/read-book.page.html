@@ -10,9 +10,9 @@
     <!-- Select centrado -->
     <ion-title>
       <ion-select placeholder="Seleccionar opción">
-        <ion-select-option value="1">Genesis 1</ion-select-option>
-        <ion-select-option value="2">Genesis 2</ion-select-option>
-        <ion-select-option value="3">Genesis 3</ion-select-option>
+        @for (p of listChapers; track p; let i = $index) {
+          <ion-select-option value="{{p.chaper}}">{{p.book}}</ion-select-option>
+        }
       </ion-select>
     </ion-title>
 

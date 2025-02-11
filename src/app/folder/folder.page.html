@@ -1,49 +1,56 @@
 
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-row>
+      <ion-col class="md-12 ion-text-center" >
+        <img src="../assets/img/RV_1996_B.png" alt="">
+      </ion-col>
+    </ion-row>
+  </ion-toolbar>
+</ion-header>
+
+<br>
+ 
 <ion-content [fullscreen]="true">
-  <br>
-  <ion-buttons slot="start">
-    <ion-menu-button></ion-menu-button>
-  </ion-buttons>
-  <ion-row>
-    <ion-col class="md-12 ion-text-center" >
-      <img src="../assets/img/RV_1996_B.png" alt="">
-    </ion-col>
-  </ion-row>
+
   
   <ion-searchbar animated="true" placeholder="Ingrese frase..."></ion-searchbar>
 
-  <div id="container">
-    <ion-grid>
-    <ion-row>
-      <ion-col size="12">
-        <b><ion-label>ANTIGUO TESTAMENTO </ion-label></b>
-        <swiper-container [slidesPerView]="2.2" >
-          
-          @for (p of app.librosBiblia.antiguoTestamento; track p; let i = $index) {
-            <swiper-slide>
-              <img [src]='"../../assets/img/LIBROS/"+p.img+".jpg"' alt="">
-            </swiper-slide>
-          }
+  <ion-row>
+    <ion-col size="12">
+      <b><ion-label>ANTIGUO TESTAMENTO </ion-label></b>
 
-        </swiper-container>
-      </ion-col>
-    </ion-row>
-    <br>
-    <ion-row>
-      <ion-col size="12">
-        <b><ion-label>NUEVO TESTAMENTO </ion-label></b>
-        <swiper-container [slidesPerView]="2.2" >
-          
-          @for (p of app.librosBiblia.antiguoTestamento; track p; let i = $index) {
-            <swiper-slide>
-              <img [src]='"../../assets/img/LIBROS/"+p.img+".jpg"' alt="">
-            </swiper-slide>
-          }
-    
-        </swiper-container>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
-   
-  </div>
+      <div class="books">
+        @for (p of app.librosBiblia.antiguoTestamento; track p; let i = $index) {
+          <a href="/read-book/{{p.nombre}}/1" class="book pointer">  {{p.abrev}} </a>
+         }
+      </div>
+
+     <!-- <swiper-container [slidesPerView]="2.2" >
+        
+        @for (p of app.librosBiblia.antiguoTestamento; track p; let i = $index) {
+          <swiper-slide>
+            <img [src]='"../../assets/img/LIBROS/"+p.img+".jpg"' alt="">
+          </swiper-slide>
+        }
+
+      </swiper-container>-->
+    </ion-col>
+  </ion-row>
+  <br>
+  <ion-row>
+    <ion-col size="12">
+      <b><ion-label>NUEVO TESTAMENTO </ion-label></b>
+      <div class="books">
+        @for (p of app.librosBiblia.nuevoTestamento; track p; let i = $index) {
+          <a href="/read-book/{{p.nombre}}/1" class="book pointer">  {{p.abrev}} </a>
+         }
+      </div>
+
+    </ion-col>
+  </ion-row>
+  
 </ion-content>

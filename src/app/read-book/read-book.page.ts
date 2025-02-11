@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { BibliesSqliteService } from '../services/biblies-sqlite.service';
 
 @Component({
   selector: 'app-read-book',
@@ -8,11 +10,33 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ReadBookPage implements OnInit {
 
-  constructor() { }
+  constructor( public active: ActivatedRoute,
+    public bd_bible : BibliesSqliteService
+  ) {
+   }
 
   ngOnInit() {
+    let name_book = this.active.snapshot.paramMap.get('book');
+    console.log(name_book)
+    this.loadTotalChapers(name_book);
   }
 
-  nameBook:string="Genesis"
+  listChapers:any=[];
+
+  async loadTotalChapers(name_book:any){
+
+    await this.bd_bible.createDatabase();
+    
+    this.bd_bible.getUniqueChaptersByBook(name_book).then(resp=>{
+
+      let total = <any> resp;
+      for(let i of total){
+        this.listChapers.push({
+          "book":name_book + " "+ i,
+          "chaper":i
+        })
+      }
+    })
+  }
 
 }

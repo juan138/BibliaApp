@@ -26,3 +26,24 @@ ion-menu-button {
 #container a {
   text-decoration: none;
 }
+
+
+b>ion-label{
+  padding: 10px !important;
+}
+
+.books{
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 5 columnas */
+  gap: 10px;
+  border: 2px  ;
+  padding: 10px;
+}
+
+.book{
+  background-color: lightblue;
+  padding: 6px;
+  text-align: center;
+  border-radius: 5px;
+  text-decoration: none;
+}
