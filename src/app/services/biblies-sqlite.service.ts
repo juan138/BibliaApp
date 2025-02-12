@@ -13,6 +13,8 @@ export class BibliesSqliteService {
 
   constructor(private sqlite: SQLite, private http: HttpClient) { }
 
+  // montar backup
+
   // Verificar si la base de datos existe
   async checkDatabaseExists(): Promise<boolean> {
     try {
@@ -128,7 +130,18 @@ async executeInsert(verses: any[], sql: string, db: SQLiteObject) {
   // Consultar versículos por libro y capítulo
   async getVersesByBookAndChapter(bookName: string, chapter: number): Promise<any[]> {
     try {
-      const result = await this.db.executeSql(
+
+       // Crear o abrir la base de datos
+       const db = await this.sqlite.create({
+        name: 'biblia.db',
+        location: 'default'
+      }).then(resp => {
+        console.log("resp conection",resp)
+        return resp;
+      });
+  
+      // Ejecutar la consulta
+      const result = await db.executeSql(
         'SELECT * FROM bible WHERE nombre_libro = ? AND capitulo = ?',
         [bookName, chapter]
       );

@@ -9,7 +9,7 @@
 
     <!-- Select centrado -->
     <ion-title>
-      <ion-select placeholder="Seleccionar opción">
+      <ion-select (ionChange)="searchTextChaper()" [(ngModel)]="chaperRead" placeholder="Seleccionar opción">
         @for (p of listChapers; track p; let i = $index) {
           <ion-select-option value="{{p.chaper}}">{{p.book}}</ion-select-option>
         }
@@ -26,11 +26,13 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  
+  @for (p of listVersiculos; track p; let i = $index) {
+    <p><b>{{p.versiculo}}</b> &nbsp; {{p.texto}}</p>
+  }
 </ion-content>
 
-<ion-footer>
+<!--<ion-footer>
   <ion-toolbar>
     <ion-title>Configuraci&oacute;n  </ion-title>
   </ion-toolbar>
-</ion-footer>
+</ion-footer>-->

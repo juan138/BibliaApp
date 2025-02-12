@@ -15,13 +15,19 @@ export class ReadBookPage implements OnInit {
   ) {
    }
 
-  ngOnInit() {
-    let name_book = this.active.snapshot.paramMap.get('book');
-    console.log(name_book)
-    this.loadTotalChapers(name_book);
+  async ngOnInit() {
+    this.bookName = this.active.snapshot.paramMap.get('book');
+    console.log(this.bookName)
+    await this.loadTotalChapers(this.bookName);
+    let chaper = this.active.snapshot.paramMap.get('chaper');
+    this.chaperRead = chaper;
+    this.searchTextChaper();
   }
 
+  bookName:any;
+  chaperRead:any;
   listChapers:any=[];
+  listVersiculos:any=[];
 
   async loadTotalChapers(name_book:any){
 
@@ -36,6 +42,15 @@ export class ReadBookPage implements OnInit {
         })
       }
     })
+  }
+
+  async searchTextChaper(){
+    await this.bd_bible.checkDatabaseExists();
+    await this.bd_bible.getVersesByBookAndChapter(this.bookName,this.chaperRead).then(resp=>{
+      this.listVersiculos=[];
+        console.log(resp);
+        this.listVersiculos=resp;
+    }) 
   }
 
 }
