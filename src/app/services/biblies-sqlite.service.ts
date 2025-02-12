@@ -17,10 +17,11 @@ export class BibliesSqliteService {
   async checkDatabaseExists(): Promise<boolean> {
     try {
       // Intentar abrir la base de datos, si no existe, lanzará un error
-      await this.sqlite.create({
+      this.db = await this.sqlite.create({
         name: 'biblia.db',
         location: 'default'  // La ubicación de la base de datos
       });
+      console.log('cheched');
       return true; // Si no hubo error, la base de datos existe o se creó
     } catch (error) {
       console.error('Error al verificar existencia de la base de datos', error);
@@ -29,25 +30,28 @@ export class BibliesSqliteService {
   }
 
   // Inicializar la base de datos
-  public async createDatabase() {
+  public async createDatabase(): Promise<boolean>  {
     try {
       // Crear la conexión con la base de datos
-      this.db = await this.sqlite.create({
+      return await this.sqlite.create({
         name: 'biblia.db',  // Nombre de la base de datos
         location: 'default' // Ubicación por defecto en Cordova
+      }).then(resp=>{
+        this.db = resp;
+        console.log('Conexión establecida');
+        this.createTable(this.db);
+        return true;
       });
-
-      console.log('Conexión establecida');
-      await this.createTable();
     } catch (error) {
       console.error('Error al crear o abrir la base de datos:', error);
+      return false;
     }
   }
 
   // Crear la tabla
-  private async createTable() {
+  private async createTable(db: SQLiteObject) {
     try {
-      await this.db.executeSql(`CREATE TABLE IF NOT EXISTS bible (
+      await db.executeSql(`CREATE TABLE IF NOT EXISTS bible (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         seccion TEXT,
         nombre_libro TEXT,
@@ -56,30 +60,32 @@ export class BibliesSqliteService {
         texto TEXT
       )`, []);
       console.log('Tabla creada correctamente');
-      this.loadInitialData(); // Cargar los datos iniciales si es necesario
+      this.loadInitialData(db); // Cargar los datos iniciales si es necesario
+      console.log('datos creados correctamente');
     } catch (error) {
       console.error('Error al crear la tabla:', error);
     }
   }
 
   // Cargar datos iniciales desde el JSON
-  private async loadInitialData() {
+  private async loadInitialData(db: SQLiteObject) {
     this.http.get<any[]>(this.urlJson).subscribe((verses: any[]) => {
       const sql = 'INSERT INTO bible (seccion, nombre_libro, capitulo, versiculo, texto) VALUES (?, ?, ?, ?, ?)';
-      this.executeInsert(verses, sql);
+      this.executeInsert(verses, sql,db);
     });
   }
 
   // Insertar versículos
-  async executeInsert(verses: any, sql: string) {
+  async executeInsert(verses: any, sql: string,db: SQLiteObject) {
     for (let verse of verses) {
       try {
-        await this.db.executeSql(sql, [verse.seccion, verse.nombre_libro, verse.capitulo, verse.versiculo, verse.texto]);
-        console.log(`Versículo insertado: ${verse.nombre_libro} ${verse.capitulo}:${verse.versiculo}`);
+        await db.executeSql(sql, [verse.seccion, verse.nombre_libro, verse.capitulo, verse.versiculo, verse.texto]);
+        //console.log(`Versículo insertado: ${verse.nombre_libro} ${verse.capitulo}:${verse.versiculo}`);
       } catch (error) {
         console.error('Error al insertar versículo:', error);
       }
     }
+    return true;
   }
 
   // Consultar un versículo específico

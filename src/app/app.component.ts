@@ -22,19 +22,23 @@ export class AppComponent   implements OnInit {
   constructor(public app : AppModule,
     private sqliteService: BibliesSqliteService
   ) {
-
     this.librosBiblia=app.librosBiblia;
-
-
   }
 
   async ngOnInit() {
     // Verificar si la base de datos existe y si no, crearla.
-    const dbExists = await this.sqliteService.checkDatabaseExists();
+    await this.sqliteService.checkDatabaseExists();
 
-    if (!dbExists) {
-      // Si la base de datos no existe, crearla y agregar los datos iniciales
-      await this.sqliteService.createDatabase();
-    }
+    let existDb = localStorage.getItem("createdDb");
+      if(existDb!='true'){
+        // Si la base de datos no existe, crearla y agregar los datos iniciales
+        await this.sqliteService.createDatabase().then(resp => {
+          if(resp){
+            localStorage.setItem("createdDb",'true');
+          }else{
+            localStorage.setItem("createdDb",'false');
+          }
+        });
+      }
   }
 }
