@@ -19,7 +19,7 @@
               
               @for (p of librosBiblia.antiguoTestamento; track p; let i = $index) {
                 <ion-menu-toggle auto-hide="false">
-                  <ion-item class="pointer" [routerLink]="'/read-book/1/1'" lines="none">
+                  <ion-item class="pointer" [routerLink]="'/read-book/'+p.nombre+'/1'" lines="none">
                     <ion-icon aria-hidden="true" slot="start" ios="bookmark-outline" md="bookmark-sharp"></ion-icon>
                     <ion-label>{{ p.nombre }}</ion-label>
                   </ion-item>
@@ -38,7 +38,7 @@
             </ion-item>
             <div class="ion-padding" slot="content">
               @for (label of librosBiblia.nuevoTestamento; track label) {
-                <ion-item class="pointer" lines="none">
+                <ion-item class="pointer" [routerLink]="'/read-book/'+label.nombre+'/1'" lines="none">
                   <ion-icon aria-hidden="true" slot="start" ios="bookmark-outline" md="bookmark-sharp"></ion-icon>
                   <ion-label>{{ label.nombre }}</ion-label>
                 </ion-item>

@@ -25,7 +25,7 @@
 
       <div class="books">
         @for (p of app.librosBiblia.antiguoTestamento; track p; let i = $index) {
-          <a href="/read-book/{{p.nombre}}/1" class="book pointer">  {{p.abrev}} </a>
+          <a [routerLink]="['/read-book', p.nombre, 1]" class="book pointer">  <b>{{p.abrev}}</b> </a>
          }
       </div>
 
@@ -46,7 +46,7 @@
       <b><ion-label>NUEVO TESTAMENTO </ion-label></b>
       <div class="books">
         @for (p of app.librosBiblia.nuevoTestamento; track p; let i = $index) {
-          <a href="/read-book/{{p.nombre}}/1" class="book pointer">  {{p.abrev}} </a>
+          <a  [routerLink]="['/read-book', p.nombre, 1]"  class="book pointer">  <b>{{p.abrev}}</b> </a>
          }
       </div>
 

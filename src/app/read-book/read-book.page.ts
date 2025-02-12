@@ -25,12 +25,11 @@ export class ReadBookPage implements OnInit {
 
   async loadTotalChapers(name_book:any){
 
-    await this.bd_bible.createDatabase();
+    await this.bd_bible.checkDatabaseExists();
     
-    this.bd_bible.getUniqueChaptersByBook(name_book).then(resp=>{
-
+    await this.bd_bible.getUniqueChaptersByBook(name_book).then(resp=>{
       let total = <any> resp;
-      for(let i of total){
+      for(let i=1 ; i<=total ; i++){
         this.listChapers.push({
           "book":name_book + " "+ i,
           "chaper":i

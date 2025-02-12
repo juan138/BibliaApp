@@ -29,64 +29,87 @@ export class BibliesSqliteService {
     }
   }
 
-  // Inicializar la base de datos
-  public async createDatabase(): Promise<boolean>  {
-    try {
-      // Crear la conexión con la base de datos
-      return await this.sqlite.create({
-        name: 'biblia.db',  // Nombre de la base de datos
-        location: 'default' // Ubicación por defecto en Cordova
-      }).then(resp=>{
-        this.db = resp;
-        console.log('Conexión establecida');
-        this.createTable(this.db);
-        return true;
-      });
-    } catch (error) {
-      console.error('Error al crear o abrir la base de datos:', error);
-      return false;
-    }
-  }
+ // Inicializar la base de datos
+public async createDatabase(): Promise<boolean> {
+  try {
+    // Crear la conexión con la base de datos
+    const db = await this.sqlite.create({
+      name: 'biblia.db',
+      location: 'default',
+    });
 
-  // Crear la tabla
-  private async createTable(db: SQLiteObject) {
-    try {
-      await db.executeSql(`CREATE TABLE IF NOT EXISTS bible (
+    this.db = db;
+    console.log('Conexión establecida');
+
+    // Crear la tabla
+    await this.createTable(this.db);
+
+    // Cargar datos iniciales y esperar a que termine
+    await this.loadInitialData(this.db);
+
+    console.log('Base de datos lista con datos cargados');
+    return true;
+  } catch (err) {
+    console.error('Error al crear o abrir la base de datos:', err);
+    return false;
+  }
+}
+
+// Crear la tabla
+private async createTable(db: SQLiteObject) {
+  try {
+    await db.executeSql(
+      `CREATE TABLE IF NOT EXISTS bible (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         seccion TEXT,
         nombre_libro TEXT,
         capitulo INTEGER,
         versiculo INTEGER,
         texto TEXT
-      )`, []);
-      console.log('Tabla creada correctamente');
-      this.loadInitialData(db); // Cargar los datos iniciales si es necesario
-      console.log('datos creados correctamente');
-    } catch (error) {
-      console.error('Error al crear la tabla:', error);
-    }
+      )`,
+      []
+    );
+    console.log('Tabla creada correctamente');
+  } catch (error) {
+    console.error('Error al crear la tabla:', error);
   }
+}
 
-  // Cargar datos iniciales desde el JSON
-  private async loadInitialData(db: SQLiteObject) {
-    this.http.get<any[]>(this.urlJson).subscribe((verses: any[]) => {
-      const sql = 'INSERT INTO bible (seccion, nombre_libro, capitulo, versiculo, texto) VALUES (?, ?, ?, ?, ?)';
-      this.executeInsert(verses, sql,db);
-    });
-  }
-
-  // Insertar versículos
-  async executeInsert(verses: any, sql: string,db: SQLiteObject) {
-    for (let verse of verses) {
-      try {
-        await db.executeSql(sql, [verse.seccion, verse.nombre_libro, verse.capitulo, verse.versiculo, verse.texto]);
-        //console.log(`Versículo insertado: ${verse.nombre_libro} ${verse.capitulo}:${verse.versiculo}`);
-      } catch (error) {
-        console.error('Error al insertar versículo:', error);
+// Cargar datos iniciales desde el JSON y esperar a que termine
+private async loadInitialData(db: SQLiteObject): Promise<void> {
+  return new Promise((resolve, reject) => {
+    this.http.get<any[]>(this.urlJson).subscribe(
+      async (verses: any[]) => {
+        const sql =
+          'INSERT INTO bible (seccion, nombre_libro, capitulo, versiculo, texto) VALUES (?, ?, ?, ?, ?)';
+        await this.executeInsert(verses, sql, db);
+        resolve(); // Indicar que terminó
+      },
+      (error) => {
+        console.error('Error al cargar datos iniciales:', error);
+        reject(error);
       }
+    );
+  });
+}
+
+// Insertar versículos
+async executeInsert(verses: any[], sql: string, db: SQLiteObject) {
+  for (let verse of verses) {
+    try {
+      await db.executeSql(sql, [
+        verse.seccion,
+        verse.nombre_libro,
+        verse.capitulo,
+        verse.versiculo,
+        verse.texto,
+      ]);
+    } catch (error) {
+      console.error('Error al insertar versículo:', error);
     }
-    return true;
   }
+}
+
 
   // Consultar un versículo específico
   public async getVerseByReference(book: string, chapter: number, verse: number) {
@@ -182,17 +205,23 @@ export class BibliesSqliteService {
   // Consultar capítulos únicos por libro
   async getUniqueChaptersByBook(bookName: string): Promise<number> {
     try {
-      if (!this.db) {
-        console.error('La base de datos no está abierta');
-        return 0;
-      }
-
-      const result = await this.db.executeSql(
+      // Crear o abrir la base de datos
+      const db = await this.sqlite.create({
+        name: 'biblia.db',
+        location: 'default'
+      }).then(resp => {
+        console.log("resp conection",resp)
+        return resp;
+      });
+  
+      // Ejecutar la consulta
+      const result = await db.executeSql(
         'SELECT DISTINCT capitulo FROM bible WHERE nombre_libro = ?',
         [bookName]
       );
-
-      return result.rows.length;  // Devuelve el número de capítulos únicos
+  
+      // Retornar la cantidad de capítulos únicos
+      return result.rows.length ?? 0;
     } catch (error) {
       console.error('Error al obtener capítulos únicos por libro:', error);
       return 0;

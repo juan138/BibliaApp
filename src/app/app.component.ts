@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AppModule } from './app.module';
 import { BibliesSqliteService } from './services/biblies-sqlite.service';
+import { LoadingController } from '@ionic/angular';
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
@@ -20,7 +21,8 @@ export class AppComponent   implements OnInit {
 
   librosBiblia:any;
   constructor(public app : AppModule,
-    private sqliteService: BibliesSqliteService
+    private sqliteService: BibliesSqliteService,
+    private loadingController: LoadingController
   ) {
     this.librosBiblia=app.librosBiblia;
   }
@@ -31,6 +33,10 @@ export class AppComponent   implements OnInit {
 
     let existDb = localStorage.getItem("createdDb");
       if(existDb!='true'){
+        const loading = await this.loadingController.create({
+          message: 'Preparando para primer uso ...',
+        });
+        await loading.present();
         // Si la base de datos no existe, crearla y agregar los datos iniciales
         await this.sqliteService.createDatabase().then(resp => {
           if(resp){
@@ -38,6 +44,11 @@ export class AppComponent   implements OnInit {
           }else{
             localStorage.setItem("createdDb",'false');
           }
+          console.log("SC")
+          loading.dismiss(); // Descartar el loading
+        }).catch(err=>{
+          console.log("ER")
+          loading.dismiss(); // Descartar el loading
         });
       }
   }
