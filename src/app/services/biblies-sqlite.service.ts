@@ -11,6 +11,8 @@ export class BibliesSqliteService {
 
   private db!: SQLiteObject;  // Definir la variable db como SQLiteDBConnection
 
+  scriptInserts:string="";
+
   constructor(private sqlite: SQLite, private http: HttpClient) { }
 
   // montar backup
@@ -84,7 +86,13 @@ private async loadInitialData(db: SQLiteObject): Promise<void> {
       async (verses: any[]) => {
         const sql =
           'INSERT INTO bible (seccion, nombre_libro, capitulo, versiculo, texto) VALUES (?, ?, ?, ?, ?)';
+
+          this.scriptInserts = this.scriptInserts + " INSERT INTO bible (seccion, nombre_libro, capitulo, versiculo, texto) VALUES ";
+
         await this.executeInsert(verses, sql, db);
+
+        localStorage.setItem("scriptSQL",this.scriptInserts);
+        
         resolve(); // Indicar que terminó
       },
       (error) => {
@@ -97,8 +105,17 @@ private async loadInitialData(db: SQLiteObject): Promise<void> {
 
 // Insertar versículos
 async executeInsert(verses: any[], sql: string, db: SQLiteObject) {
+  var count = 1;
   for (let verse of verses) {
     try {
+
+      // preparo script para tomarlo de la sesion y uasrlo despues en un txt
+        this.scriptInserts = this.scriptInserts 
+        + (count==1?" ":` , `) 
+        + `('${verse.seccion}','${verse.nombre_libro}','${verse.capitulo}','${verse.versiculo}','${verse.texto}')`;
+        
+        count++;
+
       await db.executeSql(sql, [
         verse.seccion,
         verse.nombre_libro,
