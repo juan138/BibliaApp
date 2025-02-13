@@ -29,7 +29,10 @@ export class FolderPage implements OnInit {
 
 onSearchInput(event: any) {
   this.searchText = event.target.value;
-  console.log('Digitando:', this.searchText);
+  if(this.searchText===''){
+    this.listVersiculos=[];
+    this.showBooks=true;
+  }
 }
 
 // buscar texto en versiculos

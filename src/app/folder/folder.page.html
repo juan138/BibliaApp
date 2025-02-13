@@ -71,11 +71,10 @@
     <ion-card *ngFor="let p of listVersiculos; let i = index" class="mini-card">
       <ion-card-content>
         <div class="header">
-          <span class="libro">{{ p.nombre_libro }}</span>
-          <span class="capitulo">{{ p.capitulo }}:{{ p.versiculo }}</span>
+          <span class="libro">{{ p.nombre_libro }} &nbsp; {{ p.capitulo }}:{{ p.versiculo }}</span>
+          <span class="capitulo"><ion-icon name="arrow-forward-circle" class="icono" [routerLink]="['/read-book', p.nombre_libro, p.capitulo]" ></ion-icon></span>
         </div> 
         <p class="texto">{{ p.texto }}</p>
-        <ion-icon name="arrow-forward-circle" class="icono" [routerLink]="['/read-book', p.nombre_libro, p.capitulo]" ></ion-icon>
       </ion-card-content>
     </ion-card>
   </ion-row>
