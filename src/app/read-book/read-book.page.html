@@ -1,8 +1,8 @@
 <ion-header>
   <ion-toolbar>
     <!-- Botón de Regresar alineado a la izquierda -->
-    <ion-buttons slot="start">
-      <ion-button >
+    <ion-buttons *ngIf="showPrev" slot="start">
+      <ion-button (click)="prevChaper()" >
         <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -11,14 +11,14 @@
     <ion-title>
       <ion-select (ionChange)="searchTextChaper()" [(ngModel)]="chaperRead" placeholder="Seleccionar opción">
         @for (p of listChapers; track p; let i = $index) {
-          <ion-select-option value="{{p.chaper}}">{{p.book}}</ion-select-option>
+          <ion-select-option [value]="p.chaper">{{p.book}}</ion-select-option>
         }
       </ion-select>
     </ion-title>
 
     <!-- Botón Next alineado a la derecha -->
-    <ion-buttons slot="end">
-      <ion-button >
+    <ion-buttons *ngIf="showNext" slot="end">
+      <ion-button (click)="nextChaper()" >
         <ion-icon slot="icon-only" name="arrow-forward"></ion-icon>
       </ion-button>
     </ion-buttons>

@@ -16,6 +16,35 @@ export class BibliesSqliteService {
   constructor(private sqlite: SQLite, private http: HttpClient) { }
 
   // montar backup
+  private async loadSQLScript(db: SQLiteObject): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.http.get("../assets/db/db_bible1909.sql", { responseType: 'text' }).subscribe(
+        async (sqlScript: string) => {
+          try {
+            await this.executeSQLScript(sqlScript, db);
+            resolve();
+          } catch (error) {
+            console.error("Error ejecutando el script SQL:", error);
+            reject(error);
+          }
+        },
+        (error) => {
+          console.error("Error al cargar el archivo SQL:", error);
+          reject(error);
+        }
+      );
+    });
+  }
+
+  private async executeSQLScript(sqlScript: string, db: SQLiteObject): Promise<void> {
+    const queries = sqlScript.split(";;"); // Dividir en sentencias SQL
+    //console.log("nueva insercion",queries)
+    for (const query of queries) {
+      if (query.trim()) {
+        await db.executeSql(query, []);
+      }
+    }
+  }
 
   // Verificar si la base de datos existe
   async checkDatabaseExists(): Promise<boolean> {
@@ -49,8 +78,8 @@ public async createDatabase(): Promise<boolean> {
     await this.createTable(this.db);
 
     // Cargar datos iniciales y esperar a que termine
-    await this.loadInitialData(this.db);
-
+   // await this.loadInitialData(this.db);
+    await this.loadSQLScript(this.db);
     console.log('Base de datos lista con datos cargados');
     return true;
   } catch (err) {
@@ -105,17 +134,8 @@ private async loadInitialData(db: SQLiteObject): Promise<void> {
 
 // Insertar versículos
 async executeInsert(verses: any[], sql: string, db: SQLiteObject) {
-  var count = 1;
   for (let verse of verses) {
     try {
-
-      // preparo script para tomarlo de la sesion y uasrlo despues en un txt
-        this.scriptInserts = this.scriptInserts 
-        + (count==1?" ":` , `) 
-        + `('${verse.seccion}','${verse.nombre_libro}','${verse.capitulo}','${verse.versiculo}','${verse.texto}')`;
-        
-        count++;
-
       await db.executeSql(sql, [
         verse.seccion,
         verse.nombre_libro,
@@ -128,21 +148,6 @@ async executeInsert(verses: any[], sql: string, db: SQLiteObject) {
     }
   }
 }
-
-
-  // Consultar un versículo específico
-  public async getVerseByReference(book: string, chapter: number, verse: number) {
-    try {
-      const result = await this.db.executeSql(
-        'SELECT * FROM bible WHERE nombre_libro = ? AND capitulo = ? AND versiculo = ?',
-        [book, chapter, verse]
-      );
-      return result.rows.length > 0 ? result.rows.item(0) : null;
-    } catch (error) {
-      console.error('Error al obtener versículo por referencia:', error);
-      return null;
-    }
-  }
 
   // Consultar versículos por libro y capítulo
   async getVersesByBookAndChapter(bookName: string, chapter: number): Promise<any[]> {
@@ -173,64 +178,6 @@ async executeInsert(verses: any[], sql: string, db: SQLiteObject) {
     }
   }
 
-  // Consultar todos los versículos
-  async getAllVerses(): Promise<any[]> {
-    try {
-      const result = await this.db.executeSql('SELECT * FROM bible', []);
-      let verses = [];
-      for (let i = 0; i < result.rows.length; i++) {
-        verses.push(result.rows.item(i));
-      }
-      return verses;
-    } catch (error) {
-      console.error('Error al obtener todos los versículos:', error);
-      return [];
-    }
-  }
-
-  // Consultar capítulos únicos por sección
-  async getUniqueChaptersBySection(section: string): Promise<any[]> {
-    try {
-      const result = await this.db.executeSql(
-        'SELECT nombre_libro, COUNT(DISTINCT capitulo) AS total_capitulos FROM bible WHERE seccion = ? GROUP BY nombre_libro',
-        [section]
-      );
-      let chapters = [];
-      for (let i = 0; i < result.rows.length; i++) {
-        chapters.push(result.rows.item(i));
-      }
-      return chapters;
-    } catch (error) {
-      console.error('Error al obtener capítulos únicos por sección:', error);
-      return [];
-    }
-  }
-
-  // Consultar capítulos por libro
-  async getAllChaptersByBook(bookName: string): Promise<any[]> {
-    try {
-      const result = await this.db.executeSql(
-        'SELECT capitulo, versiculo, texto FROM bible WHERE nombre_libro = ? ORDER BY capitulo, versiculo',
-        [bookName]
-      );
-
-      // Agrupar los versículos por capítulo
-        const chapters: Record<string, { capitulo: number, nombre_libro: string, versiculos: any[] }> = {};
-
-        for (let i = 0; i < result.rows.length; i++) {
-          const { capitulo, versiculo, texto } = result.rows.item(i);
-          if (!chapters[capitulo]) {
-            chapters[capitulo] = { capitulo, nombre_libro: bookName, versiculos: [] };
-          }
-          chapters[capitulo].versiculos.push({ versiculo, texto });
-        }
-
-        return Object.values(chapters);
-    } catch (error) {
-      console.error('Error al obtener capítulos por libro:', error);
-      return [];
-    }
-  }
 
   // Consultar capítulos únicos por libro
   async getUniqueChaptersByBook(bookName: string): Promise<number> {
@@ -257,4 +204,35 @@ async executeInsert(verses: any[], sql: string, db: SQLiteObject) {
       return 0;
     }
   }
+
+
+  // BUSQUEDA DE COUNCIDENCIA DE TEXTO
+  async getCoincidencias(texto: string): Promise<any[]> {
+    try {
+
+       // Crear o abrir la base de datos
+       const db = await this.sqlite.create({
+        name: 'biblia.db',
+        location: 'default'
+      }).then(resp => {
+        console.log("resp conection",resp)
+        return resp;
+      });
+  
+      // Ejecutar la consulta
+      const result = await db.executeSql(
+        "SELECT * FROM bible WHERE texto LIKE ? COLLATE NOCASE",
+        [`%${texto}%`] // Comodines para búsqueda parcial
+      );
+      let verses = [];
+      for (let i = 0; i < result.rows.length; i++) {
+        verses.push(result.rows.item(i));
+      }
+      return verses;
+    } catch (error) {
+      console.error('Error al obtener versículos:', error);
+      return [];
+    }
+  }
+
 }

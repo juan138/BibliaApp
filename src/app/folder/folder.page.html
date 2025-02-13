@@ -17,9 +17,23 @@
 <ion-content [fullscreen]="true">
 
   
-  <ion-searchbar animated="true" placeholder="Ingrese frase..."></ion-searchbar>
+  <div style="display: flex; align-items: center; padding-inline-end: 13px; ">
+    <ion-searchbar 
+      [(ngModel)]="searchText"
+      animated="true" 
+      placeholder="Ingrese frase..."
+      (ionInput)="onSearchInput($event)"
+      (ionClear)="onSearchClear()"
+      (keyup.enter)="onSearchSubmit()"
+      class="custom-searchbar">
+    </ion-searchbar>
+  
+    <ion-button (click)="onSearchSubmit()" size="small" class="small-button">
+      <ion-icon name="send"></ion-icon> 
+    </ion-button>
+  </div>
 
-  <ion-row>
+  <ion-row *ngIf="showBooks">
     <ion-col size="12">
       <b><ion-label>ANTIGUO TESTAMENTO </ion-label></b>
 
@@ -41,7 +55,7 @@
     </ion-col>
   </ion-row>
   <br>
-  <ion-row>
+  <ion-row *ngIf="showBooks">
     <ion-col size="12">
       <b><ion-label>NUEVO TESTAMENTO </ion-label></b>
       <div class="books">
@@ -51,6 +65,19 @@
       </div>
 
     </ion-col>
+  </ion-row>
+
+  <ion-row *ngIf="!showBooks">
+    <ion-card *ngFor="let p of listVersiculos; let i = index" class="mini-card">
+      <ion-card-content>
+        <div class="header">
+          <span class="libro">{{ p.nombre_libro }}</span>
+          <span class="capitulo">{{ p.capitulo }}:{{ p.versiculo }}</span>
+        </div> 
+        <p class="texto">{{ p.texto }}</p>
+        <ion-icon name="arrow-forward-circle" class="icono" [routerLink]="['/read-book', p.nombre_libro, p.capitulo]" ></ion-icon>
+      </ion-card-content>
+    </ion-card>
   </ion-row>
   
 </ion-content>
